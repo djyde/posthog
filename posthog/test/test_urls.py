@@ -59,6 +59,7 @@ class TestUrls(APIBaseTest):
         response = self.client.get(f"/login")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @pytest.mark.urls("posthog.urls")
     def test_robots_txt_block_crawl_by_default(self):
         with self.settings(MULTI_TENANCY=False):
             importlib.reload(posthog.urls)
