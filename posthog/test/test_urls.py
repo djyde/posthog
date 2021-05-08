@@ -2,10 +2,9 @@ import importlib
 import uuid
 
 import pytest
-from django.conf import settings
 from rest_framework import status
 
-import posthog.urls
+import posthog.test.mock_urls
 from posthog.test.base import APIBaseTest
 
 
@@ -59,10 +58,9 @@ class TestUrls(APIBaseTest):
         response = self.client.get(f"/login")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @pytest.mark.urls("posthog.urls")
+    @pytest.mark.urls("posthog.test.mock_urls")
     def test_robots_txt_block_crawl_by_default(self):
         with self.settings(MULTI_TENANCY=False):
-            importlib.reload(posthog.urls)
             response = self.client.get("/robots.txt")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.content, b"User-agent: *\nDisallow: /")
@@ -70,5 +68,6 @@ class TestUrls(APIBaseTest):
     @pytest.mark.urls("posthog.test.mock_urls")
     def test_robots_txt_allow_crawl_on_cloud(self):
         with self.settings(MULTI_TENANCY=True):
+            importlib.reload(posthog.test.mock_urls)
             response = self.client.get("/robots.txt")
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
